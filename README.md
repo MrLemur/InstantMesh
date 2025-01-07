@@ -2,8 +2,8 @@
   
 # InstantMesh: Efficient 3D Mesh Generation from a Single Image with Sparse-view Large Reconstruction Models
 
-<a href="https://arxiv.org/abs/2404.07191"><img src="https://img.shields.io/badge/ArXiv-2404.07191-brightgreen"></a> 
-<a href="https://huggingface.co/TencentARC/InstantMesh"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model_Card-Huggingface-orange"></a> 
+<a href="https://arxiv.org/abs/2404.07191"><img src="https://img.shields.io/badge/ArXiv-2404.07191-brightgreen"></a>
+<a href="https://huggingface.co/TencentARC/InstantMesh"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model_Card-Huggingface-orange"></a>
 <a href="https://huggingface.co/spaces/TencentARC/InstantMesh"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Gradio%20Demo-Huggingface-orange"></a> <br>
 <a href="https://replicate.com/camenduru/instantmesh"><img src="https://img.shields.io/badge/Demo-Replicate-blue"></a>
 <a href="https://colab.research.google.com/github/camenduru/InstantMesh-jupyter/blob/main/InstantMesh_jupyter.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
@@ -18,7 +18,8 @@ This repo is the official implementation of InstantMesh, a feed-forward framewor
 https://github.com/TencentARC/InstantMesh/assets/20635237/dab3511e-e7c6-4c0b-bab7-15772045c47d
 
 # 🚩 Features and Todo List
-- [x] 🔥🔥 Release Zero123++ fine-tuning code. 
+
+- [x] 🔥🔥 Release Zero123++ fine-tuning code.
 - [x] 🔥🔥 Support for running gradio demo on two GPUs to save memory.
 - [x] 🔥🔥 Support for running demo with docker. Please refer to the [docker](docker/) directory.
 - [x] Release inference and training code.
@@ -29,6 +30,7 @@ https://github.com/TencentARC/InstantMesh/assets/20635237/dab3511e-e7c6-4c0b-bab
 # ⚙️ Dependencies and Installation
 
 We recommend using `Python>=3.10`, `PyTorch>=2.1.0`, and `CUDA>=12.1`.
+
 ```bash
 conda create --name instantmesh python=3.10
 conda activate instantmesh
@@ -38,15 +40,15 @@ pip install -U pip
 conda install Ninja
 
 # Install the correct version of CUDA
-conda install cuda -c nvidia/label/cuda-12.1.0
+conda install cuda -c nvidia/label/cuda-12.4.0
+
+# Install requirements
+pip install -r requirements.txt
 
 # Install PyTorch and xformers
 # You may need to install another xformers version if you use a different PyTorch version
-pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
-pip install xformers==0.0.22.post7
-
-# Install other requirements
-pip install -r requirements.txt
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 xformers==0.0.29.post1 --index-url https://download.pytorch.org/whl/cu124
+pip install accelerate==0.31.0
 ```
 
 # 💫 How to Use
@@ -62,11 +64,13 @@ By default, we use the `instant-mesh-large` reconstruction model variant.
 ## Start a local gradio demo
 
 To start a gradio demo in your local machine, simply run:
+
 ```bash
 python app.py
 ```
 
 If you have multiple GPUs in your machine, the demo app will run on two GPUs automatically to save memory. You can also force it to run on a single GPU:
+
 ```bash
 CUDA_VISIBLE_DEVICES=0 python app.py
 ```
@@ -76,24 +80,29 @@ Alternatively, you can run the demo with docker. Please follow the instructions 
 ## Running with command line
 
 To generate 3D meshes from images via command line, simply run:
+
 ```bash
 python run.py configs/instant-mesh-large.yaml examples/hatsune_miku.png --save_video
 ```
 
 We use [rembg](https://github.com/danielgatis/rembg) to segment the foreground object. If the input image already has an alpha mask, please specify the `no_rembg` flag:
+
 ```bash
 python run.py configs/instant-mesh-large.yaml examples/hatsune_miku.png --save_video --no_rembg
 ```
 
 By default, our script exports a `.obj` mesh with vertex colors, please specify the `--export_texmap` flag if you hope to export a mesh with a texture map instead (this will cost longer time):
+
 ```bash
 python run.py configs/instant-mesh-large.yaml examples/hatsune_miku.png --save_video --export_texmap
 ```
 
 Please use a different `.yaml` config file in the [configs](./configs) directory if you hope to use other reconstruction model variants. For example, using the `instant-nerf-large` model for generation:
+
 ```bash
 python run.py configs/instant-nerf-large.yaml examples/hatsune_miku.png --save_video
 ```
+
 **Note:** When using the `NeRF` model variants for image-to-3D generation, exporting a mesh with texture map by specifying `--export_texmap` may cost long time in the UV unwarping step since the default iso-surface extraction resolution is `256`. You can set a lower iso-surface extraction resolution in the config file.
 
 # 💻 Training
@@ -101,6 +110,7 @@ python run.py configs/instant-nerf-large.yaml examples/hatsune_miku.png --save_v
 We provide our training code to facilitate future research. But we cannot provide the training dataset due to its size. Please refer to our [dataloader](src/data/objaverse.py) for more details.
 
 To train the sparse-view reconstruction models, please run:
+
 ```bash
 # Training on NeRF representation
 python train.py --base configs/instant-nerf-large-train.yaml --gpus 0,1,2,3,4,5,6,7 --num_nodes 1
@@ -110,6 +120,7 @@ python train.py --base configs/instant-mesh-large-train.yaml --gpus 0,1,2,3,4,5,
 ```
 
 We also provide our Zero123++ fine-tuning code since it is frequently requested. The running command is:
+
 ```bash
 python train.py --base configs/zero123plus-finetune.yaml --gpus 0,1,2,3,4,5,6,7 --num_nodes 1
 ```
