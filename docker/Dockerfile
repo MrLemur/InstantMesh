@@ -1,10 +1,7 @@
 # get the development image from nvidia cuda 12.1
-FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+FROM nvidia/cuda:12.4.1-base-ubuntu22.04
 
 LABEL name="instantmesh" maintainer="instantmesh"
-
-# Add a volume for downloaded models
-VOLUME /workspace/models
 
 # create workspace folder and set it as working directory
 RUN mkdir -p /workspace/instantmesh
@@ -40,18 +37,23 @@ ENV PATH /workspace/miniconda3/envs/instantmesh/bin:$PATH
 RUN conda install Ninja
 RUN conda install cuda -c nvidia/label/cuda-12.4.1 -y
 
-RUN pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
-RUN pip install xformers==0.0.22.post7
-RUN pip install triton
+RUN pip install --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 xformers==0.0.29.post1 --index-url https://download.pytorch.org/whl/cu124
+RUN pip install --no-cache-dir triton
+
+RUN conda clean --tarballs -y
 
 # change the working directory to the repository
 WORKDIR /workspace/instantmesh
 
 # other dependencies
 ADD ./requirements.txt /workspace/instantmesh/requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /workspace/instantmesh
 
+RUN chmod +x /workspace/instantmesh/docker/entrypoint.sh
+
+ENV CONFIG="instant-mesh-large"
+
 # Run the command when the container starts
-CMD ["python", "app.py"]
+CMD ["sh", "-c", "/workspace/instantmesh/docker/entrypoint.sh"]
