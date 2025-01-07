@@ -16,13 +16,19 @@ Run docker image with a local model cache (so it is fast when container is start
 mkdir -p $HOME/models/
 export MODEL_DIR=$HOME/models/
 
-docker run -it -p 43839:43839 --platform=linux/amd64 --gpus all -v $MODEL_DIR:/workspace/instantmesh/models instantmesh
+docker run -it -p 43839:43839 --platform=linux/amd64 --gpus all -v $MODEL_DIR:/workspace/instantmesh/ckpts/models instantmesh
 ```
 
 To use specific GPUs:
 
 ```bash
-docker run -it -p 43839:43839 --platform=linux/amd64 --gpus '"device=0,1"' -v $MODEL_DIR:/workspace/instantmesh/models instantmesh
+docker run -it -p 43839:43839 --platform=linux/amd64 --gpus '"device=0,1"' -v $MODEL_DIR:/workspace/instantmesh/ckpts instantmesh
+```
+
+To use a different model file:
+
+```bash
+docker run -it -p 43839:43839 --platform=linux/amd64 --gpus all -v $MODEL_DIR:/workspace/instantmesh/ckpts -e CONFIG=instant-mesh-base instantmesh
 ```
 
 Navigate to `http://localhost:43839` to use the demo.
