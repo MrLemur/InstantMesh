@@ -39,5 +39,6 @@ figures*/
 
 # Useless Files
 *.sh
+!docker/entrypoint.sh
 blender/
 .restore/
